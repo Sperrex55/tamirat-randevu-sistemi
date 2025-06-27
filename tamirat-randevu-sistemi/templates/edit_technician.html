@@ -1,0 +1,123 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Tekniker Düzenle - Admin Paneli{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="container py-5" style="max-width: 860px;">
+  <div class="bg-white p-5 rounded-4 shadow border">
+    <h2 class="mb-4 fw-bold text-primary border-start border-4 border-primary ps-3 fs-3">
+      <i class="bi bi-tools me-2"></i>Tekniker Bilgilerini Güncelle
+    </h2>
+
+    <form method="POST" novalidate>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Ad</label>
+          <input type="text" class="form-control shadow-sm" name="ad" value="{{ technician.ad }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Soyad</label>
+          <input type="text" class="form-control shadow-sm" name="soyad" value="{{ technician.soyad }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Email</label>
+          <input type="email" class="form-control shadow-sm" name="email" value="{{ technician.email }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Telefon</label>
+          <input type="text" class="form-control shadow-sm" name="telefon" value="{{ technician.telefon }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">TC</label>
+          <input type="text" class="form-control shadow-sm" name="tc" value="{{ technician.tc }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Doğum Tarihi</label>
+          <input type="date" class="form-control shadow-sm" name="dogum_tarihi" value="{{ technician.dogum_tarihi }}">
+        </div>
+
+        <div class="col-md-6">
+          <label for="uzmanlik" class="form-label fw-semibold">Uzmanlık Alanı</label>
+          <select class="form-select shadow-sm" id="uzmanlik" name="uzmanlik" required>
+            <option value="">Seçiniz...</option>
+            <option value="Bilgisayar Teknik Servisi" {% if technician.uzmanlik == "Bilgisayar Teknik Servisi" %}selected{% endif %}>Bilgisayar Teknik Servisi</option>
+            <option value="Ağ ve Sistem Yönetimi" {% if technician.uzmanlik == "Ağ ve Sistem Yönetimi" %}selected{% endif %}>Ağ ve Sistem Yönetimi</option>
+            <option value="Mobil Cihaz Tamiri" {% if technician.uzmanlik == "Mobil Cihaz Tamiri" %}selected{% endif %}>Mobil Cihaz Tamiri</option>
+            <option value="Yazılım Geliştirme & Teknik Destek" {% if technician.uzmanlik == "Yazılım Geliştirme & Teknik Destek" %}selected{% endif %}>Yazılım Geliştirme & Teknik Destek</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="destek_modeli" class="form-label fw-semibold">Destek Modeli</label>
+          <select class="form-select shadow-sm" id="destek_modeli" name="destek_modeli" required>
+            <option value="">Seçiniz...</option>
+            <option value="Uzaktan Destek" {% if technician.destek_modeli == "Uzaktan Destek" %}selected{% endif %}>Uzaktan Destek</option>
+            <option value="Yerinde Servis" {% if technician.destek_modeli == "Yerinde Servis" %}selected{% endif %}>Yerinde Servis</option>
+            <option value="Atölye & Teknik Merkez" {% if technician.destek_modeli == "Atölye & Teknik Merkez" %}selected{% endif %}>Atölye & Teknik Merkez</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Tecrübe (yıl)</label>
+          <input type="number" min="0" class="form-control shadow-sm" name="tecrube" value="{{ technician.tecrube }}">
+        </div>
+
+        <div class="col-12">
+          <label class="form-label fw-semibold">Konum</label>
+          <input type="text" class="form-control shadow-sm" name="konum" value="{{ technician.konum }}">
+        </div>
+
+        <div class="col-12">
+          <label class="form-label fw-semibold">Referans</label>
+          <textarea class="form-control shadow-sm" name="referans" rows="2">{{ technician.referans }}</textarea>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label fw-semibold">Ek Yetenekler</label>
+          <textarea class="form-control shadow-sm" name="ek_yetenekler" rows="2">{{ technician.ek_yetenekler }}</textarea>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label fw-semibold">Yeni Şifre (değiştirmek için doldurun)</label>
+          <input type="password" class="form-control shadow-sm" name="sifre">
+        </div>
+      </div>
+
+      <div class="form-check form-switch mt-4">
+        <input class="form-check-input" type="checkbox" name="onay" value="1" id="onay" {% if technician.onay %}checked{% endif %}>
+        <label class="form-check-label fw-semibold" for="onay">Onaylı</label>
+      </div>
+
+      <div class="form-check form-switch mb-4">
+        <input class="form-check-input" type="checkbox" name="iptal" value="1" id="iptal" {% if technician.iptal %}checked{% endif %}>
+        <label class="form-check-label fw-semibold" for="iptal">İptal Edildi</label>
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <a href="{{ url_for('manage_technicians') }}" class="btn btn-outline-secondary px-4">
+          <i class="bi bi-arrow-left-circle me-1"></i> Geri Dön
+        </a>
+        <button type="submit" class="btn btn-primary px-4">
+          <i class="bi bi-check-circle me-1"></i> Güncelle
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

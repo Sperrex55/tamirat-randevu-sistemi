@@ -1,0 +1,39 @@
+{% extends "base_technician.html" %}
+
+{% block title %}Mesajlar{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+
+<div class="container my-4">
+  <h2 class="mb-4 text-center">
+    <i class="bi bi-chat-dots me-2 text-primary fs-3"></i> Mesajlaştığınız Kullanıcılar
+  </h2>
+
+  <ul class="list-group">
+    {% for user in users %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>{{ user.ad }} {{ user.soyad }}</span>
+        <a href="{{ url_for('technician_chat', user_id=user.id) }}" class="btn btn-sm btn-primary">Sohbete Git</a>
+      </li>
+    {% else %}
+      <li class="list-group-item">Henüz mesajlaşma yok.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

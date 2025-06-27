@@ -1,0 +1,132 @@
+{% extends "base_user.html" %}
+
+{% block title %}Randevu Oluştur{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='randevu_olustur.css') }}">
+
+
+<div class="container mt-4" style="max-width: 650px;">
+  <h2 class="mb-4">
+  <i class="bi bi-calendar-plus me-2 text-primary fs-4"></i> Randevu Oluştur
+</h2>
+
+
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+  <form id="appointmentForm" method="POST" action="{{ url_for('create_appointment') }}" novalidate>
+
+    <!-- Tarih -->
+    <div class="mb-3">
+      <label for="date" class="form-label">Randevu Tarihi</label>
+      <input type="date" class="form-control" id="date" name="date" required min="{{ current_date }}">
+      <div class="invalid-feedback">Lütfen geçerli bir tarih seçin.</div>
+    </div>
+
+    <!-- Uzmanlık -->
+    <div class="mb-3">
+      <label for="uzmanlik" class="form-label">Talep Edilen Uzmanlık</label>
+      <select class="form-select" id="uzmanlik" name="uzmanlik" required>
+        <option value="">Seçiniz...</option>
+        <option value="Bilgisayar Teknik Servisi">Bilgisayar Teknik Servisi</option>
+        <option value="Ağ ve Sistem Yönetimi">Ağ ve Sistem Yönetimi</option>
+        <option value="Mobil Cihaz Tamiri">Mobil Cihaz Tamiri</option>
+        <option value="Yazılım Geliştirme & Teknik Destek">Yazılım Geliştirme & Teknik Destek</option>
+      </select>
+      <div class="invalid-feedback">Lütfen uzmanlık alanı seçin.</div>
+    </div>
+
+    <!-- Destek Modeli -->
+    <div class="mb-3">
+      <label for="destek_modeli" class="form-label">Destek Modeli</label>
+      <select class="form-select" id="destek_modeli" name="destek_modeli" required>
+        <option value="">Seçiniz...</option>
+        <option value="Uzaktan Destek">Uzaktan Destek</option>
+        <option value="Yerinde Servis">Yerinde Servis</option>
+        <option value="Atölye & Teknik Merkez">Atölye & Teknik Merkez</option>
+      </select>
+      <div class="invalid-feedback">Lütfen destek modeli seçin.</div>
+    </div>
+
+    <!-- Kategori -->
+    <div class="mb-3">
+      <label for="category" class="form-label">Randevu Kategorisi</label>
+      <select class="form-select" id="category" name="category" required>
+        <option value="" selected disabled>Seçiniz...</option>
+        <option value="tamirat">Tamirat</option>
+        <option value="tadilat">Tadilat</option>
+        <option value="bakim">Bakım</option>
+        <option value="yazilim">Yazılım</option>
+      </select>
+      <div class="invalid-feedback">Lütfen kategori seçin.</div>
+    </div>
+
+    <!-- Açıklama -->
+    <div class="mb-3">
+      <label for="description" class="form-label">Randevu Açıklaması</label>
+      <textarea class="form-control" id="description" name="description" rows="4" maxlength="500" placeholder="Detayları giriniz..." required></textarea>
+      <div class="form-text"><span id="charCount">0</span>/500 karakter</div>
+      <div class="invalid-feedback">Lütfen açıklama girin.</div>
+    </div>
+
+    <button type="submit" id="submitBtn" class="btn btn-primary">
+  <i class="bi bi-calendar-plus me-1"></i>
+  <span id="btnText">Randevu Oluştur</span>
+  <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+</button>
+
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (() => {
+    const form = document.getElementById('appointmentForm');
+    const description = document.getElementById('description');
+    const charCount = document.getElementById('charCount');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    // Karakter sayacı
+    description.addEventListener('input', () => {
+      charCount.textContent = description.value.length;
+    });
+
+    // Form validasyon ve spinner
+    form.addEventListener('submit', (e) => {
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+        form.classList.add('was-validated');
+        return;
+      }
+      btnText.textContent = 'Gönderiliyor...';
+      btnSpinner.classList.remove('d-none');
+      submitBtn.disabled = true;
+    });
+
+    // Minimum tarih bugünden başlasın
+    const dateInput = document.getElementById('date');
+    const today = new Date().toISOString().split('T')[0];
+    if (!dateInput.min) {
+      dateInput.min = today;
+    }
+  })();
+</script>
+{% endblock %}

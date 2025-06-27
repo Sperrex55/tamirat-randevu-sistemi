@@ -1,0 +1,158 @@
+{% extends "base_technician.html" %}
+
+{% block title %}Randevu Geçmişi{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">
+        <i class="bi bi-clock-history"></i> Randevu Geçmişi
+    </h2>
+
+    {% if appointments %}
+    <div class="table-responsive rounded shadow-sm">
+        <table class="table table-hover align-middle">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>#</th>
+                    <th>Tarih</th>
+                    <th>Kullanıcı</th>
+                    <th>Uzmanlık</th>
+                    <th>Kategori</th>
+                    <th>Durum</th>
+                    <th>Detay</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                {% for appointment in appointments %}
+                <tr>
+                    <td><strong>#{{ appointment.id }}</strong></td>
+                    <td>{{ appointment.date.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ appointment.user.ad }} {{ appointment.user.soyad }}</td>
+                    <td>{{ appointment.uzmanlik }}</td>
+                    <td>{{ appointment.category }}</td>
+                    <td>
+                        <span class="badge rounded-pill 
+                            {% if appointment.status == 'Tamamlandı' %} bg-success
+                            {% elif appointment.status == 'İptal Edildi' %} bg-danger
+                            {% elif appointment.status == 'Beklemede' %} bg-warning text-dark
+                            {% else %} bg-secondary
+                            {% endif %}">
+                            {{ appointment.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#detailsModal{{ appointment.id }}">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Detay Modal -->
+                <div class="modal fade" id="detailsModal{{ appointment.id }}" tabindex="-1" aria-labelledby="detailsModalLabel{{ appointment.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content rounded-4">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title" id="detailsModalLabel{{ appointment.id }}">
+                                    Randevu Detayları - #{{ appointment.id }}
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="border rounded p-3">
+                                            <h5 class="text-primary">Kullanıcı Bilgileri</h5>
+                                            <p><strong>Ad Soyad:</strong> {{ appointment.user.ad }} {{ appointment.user.soyad }}</p>
+                                            <p><strong>Telefon:</strong> {{ appointment.user.telefon }}</p>
+                                            <p><strong>Email:</strong> {{ appointment.user.email }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="border rounded p-3">
+                                            <h5 class="text-primary">Randevu Bilgileri</h5>
+                                            <p><strong>Tarih:</strong> {{ appointment.date.strftime('%d/%m/%Y') }}</p>
+                                            <p><strong>Uzmanlık:</strong> {{ appointment.uzmanlik }}</p>
+                                            <p><strong>Destek Modeli:</strong> {{ appointment.destek_modeli }}</p>
+                                            <p><strong>Kategori:</strong> {{ appointment.category }}</p>
+                                            <p><strong>Durum:</strong>
+                                                <span class="badge rounded-pill
+                                                    {% if appointment.status == 'Tamamlandı' %} bg-success
+                                                    {% elif appointment.status == 'İptal Edildi' %} bg-danger
+                                                    {% else %} bg-warning text-dark
+                                                    {% endif %}">
+                                                    {{ appointment.status }}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <h5 class="text-primary">Açıklama</h5>
+                                <div class="p-3 bg-light rounded border">
+                                    {{ appointment.description }}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Sayfalandırma -->
+    <div class="d-flex justify-content-center mt-4">
+        <nav>
+            <ul class="pagination">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('technician_appointment_history', page=page-1) }}">
+                        &laquo; Önceki
+                    </a>
+                </li>
+                {% endif %}
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('technician_appointment_history', page=p) }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('technician_appointment_history', page=page+1) }}">
+                        Sonraki &raquo;
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center mt-5">
+        <i class="bi bi-info-circle-fill fs-3"></i>
+        <h5 class="mt-2">Henüz randevu geçmişiniz bulunmamaktadır.</h5>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

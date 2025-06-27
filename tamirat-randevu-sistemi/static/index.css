@@ -1,0 +1,147 @@
+/* Varsayılan Tema Değişkenleri */
+:root {
+  --color-primary: #1f2937; /* koyu gri/mavi ton */
+  --color-primary-light: #3b82f6; /* açık mavi */
+  --color-text-base: #374151; /* nötr gri */
+  --color-text-muted: #6b7280; /* daha açık gri */
+  --color-bg-light: #ffffff; /* beyaz */
+  --border-radius: 0.75rem;
+  --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Genel Gövde Stili */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--color-bg-light);
+  color: var(--color-text-base);
+  line-height: 1.6;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* HERO BÖLÜMÜ - Kayan Arka Plan */
+@keyframes backgroundScroll {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.hero-section {
+  position: relative;
+  background-image: url('/static/images/anasayfa.jpg');
+  background-repeat: repeat-x;
+  background-size: cover;
+  background-position: 0% center;
+  animation: backgroundScroll 60s linear infinite;
+  border-radius: var(--border-radius);
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-light);
+  margin-top: 2rem;
+}
+
+/* Başlık Stilleri */
+.hero-section h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.hero-section p {
+  font-size: 1.25rem;
+  font-weight: 400;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Buton Stilleri */
+.hero-section .btn-warning {
+  padding: 12px 20px;
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.hero-section .btn-warning:hover {
+  background: #ff9800;
+  color: white;
+}
+
+/* Özellik Kartları */
+.feature-card {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: var(--border-radius);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow-light);
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Accordion Genel Stil */
+.accordion-item {
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 15px;
+  border: 1px solid #004085;
+}
+
+/* Accordion Buton */
+.accordion-button {
+  font-weight: bold;
+  background: linear-gradient(to right, #0056b3, #004085);
+  color: white;
+  padding: 15px;
+  box-shadow: none;
+  transition: none; /* Açılınca değişiklik olmasını önlemek */
+}
+
+/* Hover Efekti */
+.accordion-button:hover {
+  background: #003366;
+}
+
+/* Açılınca Efekt - Kaldırıldı */
+.accordion-button:not(.collapsed) {
+  background: linear-gradient(to right, #0056b3, #004085); /* Açık durumda da aynı kalsın */
+  color: white;
+  box-shadow: none; /* Gölge değişimini kaldır */
+}
+
+/* Accordion İçeriği */
+.accordion-body {
+  font-size: 1.1rem;
+  color: #555;
+  padding: 15px;
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
+/* Responsive ayarlamalar */
+@media (max-width: 768px) {
+  .hero-section {
+    height: 300px;
+  }
+  .hero-section h1 {
+    font-size: 2.25rem;
+  }
+  .hero-section p {
+    font-size: 1rem;
+  }
+}
+
+
+

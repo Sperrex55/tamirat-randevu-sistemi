@@ -1,0 +1,243 @@
+{% extends "register_base.html" %}
+
+{% block title %}Tekniker Kayıt - Teknolojik Servis Yönetimi{% endblock %}
+
+{% block head %}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .fixed-textarea {
+      min-height: 80px;  /* Sabit yükseklik */
+      resize: none;      /* Manuel aşağı çekmeyi engelle */
+    }
+    /* Küçük ekranlar için düzenleme */
+    @media (max-width: 768px) {
+      .fixed-textarea {
+        width: 100%;  /* Mobilde tam genişlik */
+      }
+    }
+  </style>
+{% endblock %}
+
+
+{% block content %}
+
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container mt-3">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="container mt-5">
+  <div class="card shadow-lg rounded-4">
+    <div class="card-body p-5">
+      <h3 class="card-title mb-4 text-center">Tekniker Kayıt Formu</h3>
+      <form method="post" action="{{ url_for('register_technician') }}" onsubmit="return validateForm()">
+        <div class="row g-3">
+          <!-- Temel Bilgiler -->
+          <div class="col-md-6">
+            <label for="ad" class="form-label">Ad</label>
+            <input type="text" class="form-control" id="ad" name="ad" required>
+          </div>
+          <div class="col-md-6">
+            <label for="soyad" class="form-label">Soyad</label>
+            <input type="text" class="form-control" id="soyad" name="soyad" required>
+          </div>
+          <div class="col-md-6">
+            <label for="email" class="form-label">E-posta</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+          <div class="col-md-6">
+            <label for="telefon" class="form-label">Telefon</label>
+            <input type="tel" class="form-control" id="telefon" name="telefon" maxlength="11" pattern="\d{11}" placeholder="05xxxxxxxxx" required>
+          </div>
+
+          <!-- Kimlik & Doğum Bilgileri -->
+          <div class="col-md-6">
+            <label for="tc" class="form-label">TC Kimlik No</label>
+            <input type="text" class="form-control" id="tc" name="tc" maxlength="11" pattern="\d{11}" placeholder="11 haneli TC no" required>
+          </div>
+          <div class="col-md-6">
+            <label for="dogumTarihi" class="form-label">Doğum Tarihi</label>
+            <input type="date" class="form-control" id="dogumTarihi" name="dogumTarihi" required onchange="yasKontrol()">
+            <small id="yasUyari" class="text-danger" style="display:none;">18 yaşından küçükler kayıt olamaz!</small>
+          </div>
+
+          <!-- Uzmanlık ve Destek Modeli -->
+          <div class="col-md-6">
+            <label for="uzmanlik" class="form-label">Uzmanlık Alanı</label>
+            <select class="form-select" id="uzmanlik" name="uzmanlik" required>
+              <option value="">Seçiniz...</option>
+              <option value="Bilgisayar Teknik Servisi">Bilgisayar Teknik Servisi</option>
+              <option value="Ağ ve Sistem Yönetimi">Ağ ve Sistem Yönetimi</option>
+              <option value="Mobil Cihaz Tamiri">Mobil Cihaz Tamiri</option>
+              <option value="Yazılım Geliştirme & Teknik Destek">Yazılım Geliştirme & Teknik Destek</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="destek_modeli" class="form-label">Destek Modeli</label>
+            <select class="form-select" id="destek_modeli" name="destek_modeli" required>
+              <option value="">Seçiniz...</option>
+              <option value="Uzaktan Destek">Uzaktan Destek</option>
+              <option value="Yerinde Servis">Yerinde Servis</option>
+              <option value="Atölye & Teknik Merkez">Atölye & Teknik Merkez</option>
+            </select>
+          </div>
+
+          <!-- Konum ve Tecrübe -->
+          <div class="col-md-6">
+            <label for="tecrube" class="form-label">Tecrübe Yılı</label>
+            <input type="number" class="form-control" id="tecrube" name="tecrube" min="0" max="25" placeholder="Örn: 5" required>
+          </div>
+
+          <div class="col-md-6">
+            <label for="konum" class="form-label">Konum (Enlem, Boylam)</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="konum" name="konum" placeholder="Konum alınamadı" readonly>
+              <button type="button" class="btn btn-outline-primary" onclick="konumuAl()">Konumu Al</button>
+            </div>
+            <small id="konumUyari" class="text-danger" style="display:none;">Konum alınması zorunludur!</small>
+          </div>
+
+          <!-- Yeni Ek Alanlar -->
+          <div class="col-md-6">
+            <label for="referans" class="form-label">Referans & İş Geçmişi (Opsiyonel)</label>
+            <textarea class="form-control fixed-textarea" id="referans" name="referans" rows="3" placeholder="Daha önce çalıştığınız projeler, referanslar veya iş deneyimleriniz"></textarea>
+          </div>
+          <div class="col-md-6">
+            <label for="ek_yetenekler" class="form-label">Ek Yetenekler (Opsiyonel)</label>
+            <textarea class="form-control fixed-textarea" id="ek_yetenekler" name="ek_yetenekler" rows="3" placeholder="Örneğin; ağ güvenliği, veri kurtarma, donanım onarımı gibi ek beceriler"></textarea>
+          </div>
+
+          <!-- Güvenlik Alanları -->
+          <div class="col-md-6">
+            <label for="sifre" class="form-label">Şifre</label>
+            <input type="password" class="form-control" id="sifre" name="sifre" required>
+          </div>
+          <div class="col-md-6">
+            <label for="sifreOnay" class="form-label">Şifre (Tekrar)</label>
+            <input type="password" class="form-control" id="sifreOnay" name="sifreOnay" required>
+            <small id="sifreUyari" class="text-danger" style="display:none;">Şifreler eşleşmiyor!</small>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2 mt-4">
+          <button type="submit" id="kayitButonu" class="btn btn-secondary btn-lg rounded-3">Kayıt Ol</button>
+        </div>
+
+        <div class="text-center mt-3">
+          <span>Hesabınız var mı? <a href="{{ url_for('technician_login') }}" class="text-primary fw-bold">Tekniker Giriş</a></span>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Konum alma fonksiyonu
+  function konumuAl() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        const enlem = position.coords.latitude.toFixed(5);
+        const boylam = position.coords.longitude.toFixed(5);
+        document.getElementById("konum").value = `${enlem}, ${boylam}`;
+        document.getElementById("konumUyari").style.display = "none";
+      }, function(error) {
+        alert("Konum alınamadı: " + error.message);
+      });
+    } else {
+      alert("Tarayıcınız konum özelliğini desteklemiyor.");
+    }
+  }
+
+  // TC ve Telefon alanlarına sadece rakam ve max 11 karakter girilebilir
+  document.addEventListener('DOMContentLoaded', function() {
+    const tcInput = document.getElementById("tc");
+    const telefonInput = document.getElementById("telefon");
+
+    tcInput.addEventListener("input", function () {
+      this.value = this.value.replace(/\D/g, '').slice(0, 11);
+    });
+
+    telefonInput.addEventListener("input", function () {
+      this.value = this.value.replace(/\D/g, '').slice(0, 11);
+    });
+  });
+
+  // 18 yaş kontrolü
+  function yasKontrol() {
+    const dogumTarihi = document.getElementById("dogumTarihi").value;
+    if (!dogumTarihi) return;
+
+    const today = new Date();
+    const dogum = new Date(dogumTarihi);
+
+    let yas = today.getFullYear() - dogum.getFullYear();
+    const ayFark = today.getMonth() - dogum.getMonth();
+    const gunFark = today.getDate() - dogum.getDate();
+
+    if (ayFark < 0 || (ayFark === 0 && gunFark < 0)) {
+      yas--;
+    }
+
+    const yasUyari = document.getElementById("yasUyari");
+    const kayitButonu = document.getElementById("kayitButonu");
+
+    if (yas < 18) {
+      yasUyari.style.display = "block";
+      kayitButonu.disabled = true;
+    } else {
+      yasUyari.style.display = "none";
+      kayitButonu.disabled = false;
+    }
+  }
+
+  // Form gönderiminde şifre ve konum kontrolü
+  function validateForm() {
+    const konum = document.getElementById("konum").value.trim();
+    const sifre = document.getElementById("sifre").value;
+    const sifreOnay = document.getElementById("sifreOnay").value;
+
+    let valid = true;
+
+    if (!konum) {
+      document.getElementById("konumUyari").style.display = "block";
+      valid = false;
+    } else {
+      document.getElementById("konumUyari").style.display = "none";
+    }
+
+    if (sifre !== sifreOnay) {
+      document.getElementById("sifreUyari").style.display = "block";
+      valid = false;
+    } else {
+      document.getElementById("sifreUyari").style.display = "none";
+    }
+
+    return valid; // false ise form gönderilmez
+  }
+
+  // Canlı şifre eşleşme kontrolü
+  document.addEventListener('DOMContentLoaded', function() {
+    const sifreInput = document.getElementById("sifre");
+    const sifreOnayInput = document.getElementById("sifreOnay");
+
+    sifreOnayInput.addEventListener("input", function() {
+      const sifre = sifreInput.value;
+      const sifreOnay = this.value;
+      if (sifre !== sifreOnay) {
+        document.getElementById("sifreUyari").style.display = "block";
+      } else {
+        document.getElementById("sifreUyari").style.display = "none";
+      }
+    });
+  });
+</script>
+{% endblock %}

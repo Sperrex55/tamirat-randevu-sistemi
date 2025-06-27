@@ -1,0 +1,268 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Tekniker Yönetimi - Admin Paneli{% endblock %}
+
+{% block head %}
+<style>
+  .table-container {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.3rem 0.8rem rgb(0 0 0 / 0.07);
+  }
+  tbody tr:hover {
+    background-color: #e9f0f7;
+    cursor: pointer;
+  }
+  .badge-approval-true {
+    background-color: #d1e7dd !important;
+    color: #0f5132 !important;
+    font-weight: 600;
+    box-shadow: 0 0 6px rgba(13, 110, 53, 0.3);
+  }
+  .badge-approval-false {
+    background-color: #fff3cd !important;
+    color: #664d03 !important;
+    font-weight: 600;
+    box-shadow: 0 0 6px rgba(255, 193, 7, 0.3);
+  }
+  .badge-cancel-true {
+    background-color: #f8d7da !important;
+    color: #842029 !important;
+    font-weight: 600;
+    box-shadow: 0 0 6px rgba(220, 53, 69, 0.3);
+  }
+  .badge-cancel-false {
+    background-color: #e2e3e5 !important;
+    color: #41464b !important;
+    font-weight: 600;
+    box-shadow: 0 0 6px rgba(108, 117, 125, 0.3);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="container mt-5">
+  <h2 class="mb-4 text-center fw-bold">Tekniker Yönetimi</h2>
+  <p style="color: #8a8a8a;">*İsme tıklayınca modal açılıyor</p>
+
+  <div class="table-container table-responsive">
+    <table class="table table-bordered table-striped align-middle text-center mb-0">
+      <thead class="table-primary text-primary-emphasis">
+        <tr>
+          <th>ID</th>
+          <th>Ad Soyad</th>
+          <th>Email</th>
+          <th>Uzmanlık</th>
+          <th>Onay Durumu</th>
+          <th>İptal Durumu</th>
+          <th>İşlem</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tech in technicians %}
+        <tr>
+          <td>{{ tech.id }}</td>
+          <td>
+            <a href="#"
+               class="text-decoration-none"
+               data-bs-toggle="modal"
+               data-bs-target="#technicianModal"
+               data-id="{{ tech.id }}"
+               data-ad="{{ tech.ad }}"
+               data-soyad="{{ tech.soyad }}"
+               data-tc="{{ tech.tc }}"
+               data-email="{{ tech.email }}"
+               data-telefon="{{ tech.telefon or 'Yok' }}"
+               data-uzmanlik="{{ tech.uzmanlik }}"
+               data-adres="{{ tech.adres or 'Belirtilmemiş' }}"
+               data-onay="{{ tech.onay }}"
+               data-iptal="{{ tech.iptal }}"
+               data-aciklama="{{ tech.aciklama or 'Yok' }}">
+               {{ tech.ad }} {{ tech.soyad }}
+            </a>
+          </td>
+          <td><a href="mailto:{{ tech.email }}" class="text-decoration-none">{{ tech.email }}</a></td>
+          <td>{{ tech.uzmanlik }}</td>
+          <td>
+            {% if tech.onay %}
+              <span class="badge bg-success fs-6">Onaylı</span>
+            {% else %}
+              <span class="badge bg-warning text-dark fs-6">Beklemede</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if tech.iptal %}
+              <span class="badge bg-danger fs-6">İptal Edildi</span>
+            {% else %}
+              <span class="badge bg-secondary fs-6">Aktif</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('edit_technician', id=tech.id) }}" class="btn btn-sm btn-primary" title="Düzenle">
+              <i class="bi bi-pencil-square"></i>
+            </a>
+            <button type="button" 
+        class="btn btn-sm btn-danger"
+        title="Sil"
+        data-bs-toggle="modal"
+        data-bs-target="#deleteConfirmModal"
+        data-id="{{ tech.id }}">
+  <i class="bi bi-trash3"></i>
+</button>
+
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="text-center text-muted fst-italic">Kayıtlı tekniker bulunmamaktadır.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary fw-semibold">
+      <i class="bi bi-arrow-left-circle me-1"></i> Geri Dön
+    </a>
+  </div>
+</div>
+
+<!-- Tekniker Detay Modalı -->
+<div class="modal fade" id="technicianModal" tabindex="-1" aria-labelledby="technicianModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content rounded-4 shadow-lg border-0">
+      <div class="modal-header bg-primary text-white rounded-top">
+        <h5 class="modal-title fw-bold" id="technicianModalLabel">
+          <i class="bi bi-person-badge-fill me-2"></i>Tekniker Detayları
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body bg-light px-4 py-4">
+        <dl class="row mb-0">
+          <dt class="col-sm-5 text-secondary fw-semibold mb-3">ID:</dt>
+          <dd class="col-sm-7 fs-5 fw-semibold" id="modalTechId"></dd>
+
+          <dt class="col-sm-5 text-secondary fw-semibold mb-3">Ad Soyad:</dt>
+          <dd class="col-sm-7 fs-5 fw-semibold" id="modalTechName"></dd>
+
+          <dt class="col-sm-5 text-secondary fw-semibold mb-3">TC Kimlik No:</dt>
+          <dd class="col-sm-7 fs-5 fw-semibold" id="modalTechTC"></dd>
+
+          <dt class="col-sm-5 text-secondary fw-semibold mb-3">Email:</dt>
+          <dd class="col-sm-7 fs-6">
+            <a href="#" id="modalTechEmail" class="text-decoration-none text-primary"></a>
+          </dd>
+
+          <dt class="col-sm-5 text-secondary fw-semibold mb-3">Telefon:</dt>
+          <dd class="col-sm-7 fs-6" id="modalTechPhone"></dd>
+
+          <dt class="col-sm-5 text-secondary fw-semibold mb-3">Uzmanlık:</dt>
+          <dd class="col-sm-7 fs-6" id="modalTechExpertise"></dd>
+
+          <dt class="col-sm-5 text-secondary fw-semibold mb-3">Adres:</dt>
+          <dd class="col-sm-7 fs-6" id="modalTechAddress"></dd>
+
+          <dt class="col-sm-5 text-secondary fw-semibold mb-3">Onay Durumu:</dt>
+          <dd class="col-sm-7"><span id="modalTechApproval" class="badge fs-6"></span></dd>
+
+          <dt class="col-sm-5 text-secondary fw-semibold mb-3">İptal Durumu:</dt>
+          <dd class="col-sm-7"><span id="modalTechCancel" class="badge fs-6"></span></dd>
+
+          <dt class="col-sm-5 text-secondary fw-semibold mb-3">Açıklama:</dt>
+          <dd class="col-sm-7 fs-6 text-muted" id="modalTechDescription"></dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Silme Onay Modalı -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow border-0">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deleteConfirmModalLabel">Silme Onayı</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">Bu tekniker kaydını silmek istediğinize emin misiniz?</div>
+      <div class="modal-footer">
+        <form id="deleteForm" method="POST">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="submit" class="btn btn-danger">Sil</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Detay Modalı
+const technicianModal = document.getElementById('technicianModal');
+technicianModal.addEventListener('show.bs.modal', function (event) {
+  const button = event.relatedTarget;
+  const id = button.getAttribute('data-id');
+  const ad = button.getAttribute('data-ad');
+  const soyad = button.getAttribute('data-soyad');
+  const tc = button.getAttribute('data-tc'); // ✅ TC burada okunmalı
+  const email = button.getAttribute('data-email');
+  const telefon = button.getAttribute('data-telefon');
+  const uzmanlik = button.getAttribute('data-uzmanlik');
+  const adres = button.getAttribute('data-adres');
+  const onay = button.getAttribute('data-onay') === 'True';
+  const iptal = button.getAttribute('data-iptal') === 'True';
+  const aciklama = button.getAttribute('data-aciklama');
+
+  document.getElementById('modalTechId').textContent = id;
+  document.getElementById('modalTechName').textContent = ad + ' ' + soyad;
+  document.getElementById('modalTechTC').textContent = tc; // ✅ TC yazdır
+  const emailElem = document.getElementById('modalTechEmail');
+  emailElem.textContent = email;
+  emailElem.href = 'mailto:' + email;
+  document.getElementById('modalTechPhone').textContent = telefon;
+  document.getElementById('modalTechExpertise').textContent = uzmanlik;
+  document.getElementById('modalTechAddress').textContent = adres;
+
+  const approvalBadge = document.getElementById('modalTechApproval');
+  approvalBadge.textContent = onay ? 'Onaylı' : 'Beklemede';
+  approvalBadge.className = 'badge fs-6 ' + (onay ? 'badge-approval-true' : 'badge-approval-false');
+
+  const cancelBadge = document.getElementById('modalTechCancel');
+  cancelBadge.textContent = iptal ? 'İptal Edildi' : 'Aktif';
+  cancelBadge.className = 'badge fs-6 ' + (iptal ? 'badge-cancel-true' : 'badge-cancel-false');
+
+  document.getElementById('modalTechDescription').textContent = aciklama || '-';
+});
+
+// Silme Modalı
+const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+deleteConfirmModal.addEventListener('show.bs.modal', function (event) {
+  const button = event.relatedTarget;
+  const id = button.getAttribute('data-id');
+  const form = deleteConfirmModal.querySelector('#deleteForm');
+  form.action = `/admin/technician/delete/${id}`;
+});
+
+
+</script>
+{% endblock %}

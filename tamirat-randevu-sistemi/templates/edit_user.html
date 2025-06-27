@@ -1,0 +1,156 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Kullanıcı Düzenle - Admin Paneli{% endblock %}
+
+{% block head %}
+<style>
+  .edit-user-container {
+    max-width: 700px;
+    margin: 3rem auto 5rem auto;
+    background: #fff;
+    padding: 2rem 2.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.5rem 1.2rem rgb(0 0 0 / 0.1);
+  }
+
+  .edit-user-container h2 {
+    font-weight: 700;
+    color: #0d6efd; /* Bootstrap primary */
+    margin-bottom: 2rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  label.form-label {
+    color: #0d6efd;
+  }
+
+  .form-control:focus, .form-control:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 0 8px rgba(13, 110, 253, 0.4);
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    min-width: 120px;
+    font-weight: 600;
+  }
+  .btn-secondary {
+    min-width: 120px;
+  }
+
+  @media (max-width: 576px) {
+    .edit-user-container {
+      padding: 1.5rem 1.25rem;
+      margin: 2rem 1rem 4rem 1rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+
+<div class="edit-user-container">
+  <h2 class="mb-4 fw-bold text-primary border-start border-4 border-primary ps-3 fs-3">
+      <i class="bi bi-tools me-2"></i>üye Bilgilerini Güncelle
+    </h2>
+  <form method="POST" action="{{ url_for('edit_user_admin', user_id=user.id) }}" novalidate>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label for="ad" class="form-label fw-semibold">Ad <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="ad" name="ad" value="{{ user.ad }}" required>
+        <div class="invalid-feedback">Ad alanı zorunludur.</div>
+      </div>
+
+      <div class="col-md-6">
+        <label for="soyad" class="form-label fw-semibold">Soyad <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="soyad" name="soyad" value="{{ user.soyad }}" required>
+        <div class="invalid-feedback">Soyad alanı zorunludur.</div>
+      </div>
+
+      <div class="col-12">
+        <label for="email" class="form-label fw-semibold">E-posta <span class="text-danger">*</span></label>
+        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+        <div class="invalid-feedback">Geçerli bir e-posta adresi giriniz.</div>
+      </div>
+
+      <div class="col-md-6">
+        <label for="telefon" class="form-label fw-semibold">Telefon</label>
+        <input type="tel" class="form-control" id="telefon" name="telefon" value="{{ user.telefon }}" pattern="\+?\d{10,15}" placeholder="+90 555 555 5555">
+        <div class="form-text">Telefon numarası formatı: +905551234567</div>
+      </div>
+
+      <div class="col-md-6">
+        <label for="tc" class="form-label fw-semibold">TC Kimlik No</label>
+        <input type="text" class="form-control" id="tc" name="tc" value="{{ user.tc }}" maxlength="11" pattern="\d{11}" placeholder="11 haneli TC Kimlik No">
+        <div class="invalid-feedback">11 haneli TC kimlik numarası giriniz.</div>
+      </div>
+
+      <div class="col-12">
+        <label for="adres" class="form-label fw-semibold">Adres</label>
+        <textarea class="form-control" id="adres" name="adres" rows="3" placeholder="Adresinizi giriniz...">{{ user.adres }}</textarea>
+      </div>
+
+      <div class="col-md-6">
+        <label for="dogum_tarihi" class="form-label fw-semibold">Doğum Tarihi</label>
+        <input type="date" class="form-control" id="dogum_tarihi" name="dogum_tarihi" value="{{ user.dogum_tarihi|default('') }}">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold d-block">Cinsiyet</label>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="cinsiyet" id="erkek" value="Erkek" {% if user.cinsiyet == 'Erkek' %}checked{% endif %}>
+          <label class="form-check-label" for="erkek">Erkek</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="cinsiyet" id="kadin" value="Kadın" {% if user.cinsiyet == 'Kadın' %}checked{% endif %}>
+          <label class="form-check-label" for="kadin">Kadın</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-center gap-3 mt-4">
+      <button type="submit" class="btn btn-primary px-4">
+        <i class="bi bi-save2 me-2"></i> Kaydet
+      </button>
+      <a href="{{ url_for('manage_users') }}" class="btn btn-outline-secondary px-4">
+        <i class="bi bi-x-circle me-2"></i> İptal
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+  (() => {
+    'use strict'
+    const forms = document.querySelectorAll('form')
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+      }, false)
+    })
+  })()
+</script>
+{% endblock %}

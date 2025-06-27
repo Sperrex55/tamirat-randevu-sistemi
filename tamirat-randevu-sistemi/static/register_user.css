@@ -1,0 +1,121 @@
+/* Genel Stil */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #eef2f6;
+    padding: 60px 0;
+}
+
+/* Konteyner */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* Satır Yapısı */
+.row {
+    display: flex;
+    gap: 15px; /* Yan yana daha iyi yerleşim için */
+    justify-content: center; /* Eşit hizalama */
+    align-items: stretch; /* Aynı yükseklik için */
+}
+
+/* Kart ve Görsel Sütunları */
+.col-md-6, .col-lg-6 {
+    flex: 0 0 50%; /* Yüzde 50 genişlik */
+    max-width: 50%;
+    display: flex;
+    flex-direction: column; /* İçerik dikey */
+}
+
+/* Kart Tasarımı */
+.register-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 35px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    flex-grow: 1; /* Yükseklik eşitleme */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Başlık */
+.register-card h2 {
+    color: #0056b3;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.register-card p {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 20px;
+}
+
+/* Form Alanları */
+.register-card label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-align: left;
+    color: #333;
+}
+
+/* Input ve Select */
+.register-card input,
+.register-card select {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 14px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+}
+
+/* İç Form Satırı */
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+/* Buton */
+.btn-register {
+    width: 100%;
+    padding: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 8px;
+    background: #0056b3;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-register:hover {
+    background: #004494;
+}
+
+/* Mobil Uyumluluk */
+@media (max-width: 768px) {
+    .row {
+        flex-direction: column; /* Dikey hizalama */
+        gap: 20px; /* Dikey boşluk */
+    }
+
+    .col-md-6, .col-lg-6 {
+        flex: 1 1 100%; /* Mobilde tam genişlik */
+        max-width: 100%; /* Maksimum genişlik %100 */
+    }
+
+    .register-card {
+        padding: 20px; /* Mobilde daha az iç boşluk */
+    }
+
+    .btn-register {
+        font-size: 16px; /* Buton yazı boyutunu küçült */
+    }
+}

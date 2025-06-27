@@ -1,0 +1,113 @@
+{% extends "base_user.html" %}
+
+{% block title %}Üye Dashboard{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Kapat"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="container mt-5">
+
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">👋 Hoşgeldiniz, <span class="text-primary">{{ user.ad }} {{ user.soyad }}</span></h2>
+    <p class="text-muted fs-5">Teknolojik servis sistemine hoş geldiniz. Aşağıdan randevularınızı ve mesajlarınızı takip edebilirsiniz.</p>
+  </div>
+
+  <div class="row g-4">
+    <!-- Kartlar -->
+    {% for stat in [
+      {'icon': 'calendar-check-fill', 'color': 'primary', 'title': 'Toplam Randevu', 'value': total_appointments},
+      {'icon': 'check-circle-fill', 'color': 'success', 'title': 'Tamamlanan Randevu', 'value': completed_appointments},
+      {'icon': 'envelope-fill', 'color': 'danger', 'title': 'Yeni Mesaj', 'value': messages_count}
+      ] %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4 p-4 h-100 text-center stat-card hover-shadow">
+          <div class="mb-3 text-{{ stat.color }}">
+            <i class="bi bi-{{ stat.icon }} fs-1"></i>
+          </div>
+          <h3 class="fw-bold mb-2">{{ stat.value }}</h3>
+          <p class="text-secondary fs-5 mb-0">{{ stat.title }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <h3 class="mt-5 mb-3 fw-bold border-start border-4 border-primary ps-3">📢 Aktif Duyurular</h3>
+
+  {% if announcements %}
+    <div class="row g-3">
+      {% for duyuru in announcements %}
+        <div class="col-12">
+          <div class="card border-0 shadow-sm rounded-4 p-3 h-100 announcement-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="fw-semibold mb-0 text-primary">
+                <i class="bi bi-megaphone-fill me-2"></i> {{ duyuru.title }}
+              </h5>
+              <small class="text-muted">{{ duyuru.date_created.strftime('%d.%m.%Y %H:%M') }}</small>
+            </div>
+            <p class="text-secondary mb-0 announcement-content">{{ duyuru.content }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info d-flex align-items-center gap-2" role="alert">
+      <i class="bi bi-info-circle-fill fs-4"></i>
+      Henüz duyuru bulunmamaktadır.
+    </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block head %}
+<style>
+  /* Kart hover efektleri */
+  .hover-shadow {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .hover-shadow:hover {
+    box-shadow: 0 0.8rem 1.5rem rgb(0 0 0 / 0.15);
+    transform: translateY(-4px);
+  }
+
+  /* Duyuru içerik satır sınırı */
+  .announcement-content {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Duyuru kart hover */
+  .announcement-card:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.3s ease;
+  }
+
+  /* Toast buton daha belirgin */
+  .toast .btn-close {
+    filter: brightness(0) invert(1);
+  }
+
+  /* Başlık altındaki border ve padding */
+  h3.border-start {
+    padding-left: 0.75rem;
+  }
+</style>
+{% endblock %}

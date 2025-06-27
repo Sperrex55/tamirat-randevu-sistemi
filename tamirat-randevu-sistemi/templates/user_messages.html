@@ -1,0 +1,132 @@
+{% extends "base_user.html" %}
+
+{% block title %}Mesajlar{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+
+<div class="container my-4" style="max-width: 800px;">
+
+  <h2 class="mb-4 text-center">
+    <i class="bi bi-envelope-paper me-2 text-primary fs-3"></i> Gelen Mesajlar
+  </h2>
+
+  <!-- Arama kutusu -->
+  <div class="input-group mb-3">
+    <span class="input-group-text"><i class="bi bi-search"></i></span>
+    <input type="search" id="searchMessages" class="form-control" placeholder="Mesajlarda ara..." aria-label="Mesajlarda ara">
+    <button class="btn btn-outline-secondary" type="button" id="clearSearch">Temizle</button>
+  </div>
+
+  {% if messages %}
+    <div id="messagesList" class="list-group">
+
+      {% for msg in messages %}
+        <div class="list-group-item list-group-item-action mb-3 rounded shadow-sm
+          {% if not msg.is_read %}border-primary bg-light{% else %}bg-white{% endif %}">
+
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-1 {% if not msg.is_read %}fw-bold{% endif %}">{{ loop.index }}. {{ msg.subject }}</h5>
+            <small class="text-muted">{{ msg.created_at.strftime('%d %b %Y, %H:%M') }}</small>
+          </div>
+
+          <p class="mb-1">{{ msg.body | truncate(150, True, '...') }}</p>
+
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            {% if not msg.is_read %}
+              <span class="badge bg-primary">Okunmamış</span>
+            {% endif %}
+            <button class="btn btn-sm btn-outline-primary toggle-details">Detay</button>
+          </div>
+
+          <div class="full-message mt-2 d-none">
+            <hr>
+            <p class="mb-0">{{ msg.body }}</p>
+          </div>
+
+        </div>
+      {% endfor %}
+
+    </div>
+
+  {% else %}
+    <div class="alert alert-info text-center p-4 rounded-3 shadow-sm" role="alert">
+      <i class="bi bi-inbox fs-3 d-block mb-2 text-primary"></i>
+      Henüz size ulaşan bir mesaj bulunmamaktadır.
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Arama filtresi
+  document.getElementById('searchMessages').addEventListener('input', function () {
+    const filter = this.value.toLowerCase();
+    const messages = document.querySelectorAll('#messagesList .list-group-item');
+
+    messages.forEach(msg => {
+      const subject = msg.querySelector('h5').textContent.toLowerCase();
+      const body = msg.querySelector('p').textContent.toLowerCase();
+      if (subject.includes(filter) || body.includes(filter)) {
+        msg.style.display = '';
+      } else {
+        msg.style.display = 'none';
+      }
+    });
+  });
+
+  // Temizle butonu
+  document.getElementById('clearSearch').addEventListener('click', function () {
+    const input = document.getElementById('searchMessages');
+    input.value = '';
+    input.dispatchEvent(new Event('input'));
+  });
+
+  // Detay aç/kapa
+  document.querySelectorAll('.toggle-details').forEach(button => {
+    button.addEventListener('click', () => {
+      const message = button.closest('.list-group-item');
+      const fullText = message.querySelector('.full-message');
+      fullText.classList.toggle('d-none');
+      button.textContent = fullText.classList.contains('d-none') ? 'Detay' : 'Gizle';
+    });
+  });
+
+  // Tıklanınca okunmuş işaretleme efekti
+  document.querySelectorAll('.list-group-item').forEach(item => {
+    item.addEventListener('click', () => {
+      item.classList.remove('border-primary', 'bg-light');
+      const badge = item.querySelector('.badge');
+      if (badge) badge.remove();
+      const title = item.querySelector('h5');
+      if (title) title.classList.remove('fw-bold');
+    });
+  });
+</script>
+{% endblock %}
+
+{% block head %}
+<style>
+  .bg-light.border-primary {
+    border-left: 5px solid #0d6efd !important;
+    background-color: #f0f8ff !important;
+  }
+</style>
+{% endblock %}

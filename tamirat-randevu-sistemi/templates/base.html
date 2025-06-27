@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Teknolojik Servis Yönetimi{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <!-- Özel CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+
+
+   <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+            <i class="fas fa-tools text-white"></i> Servis Yönetimi
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('index') }}">Ana Sayfa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('about') }}">Hakkımızda</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('contact') }}">İletişim</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-3">
+                <li class="nav-item">
+                    <a class="nav-link btn btn-outline-light" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-outline-light" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">
+                        <i class="fas fa-user-plus"></i> Kayıt Ol
+                    </a>
+                </li>
+                
+            </ul>
+            
+        </div>
+    </div>
+</nav>
+
+<!-- Giriş Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 rounded-lg border-0 text-center">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold text-primary w-100">Kim olarak giriş yapmak istiyorsunuz?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{{ url_for('choose_login') }}">
+
+          <button type="submit" name="role" value="user" class="btn btn-primary btn-lg w-100 mb-2">
+            <i class="fas fa-user me-2"></i> Üye Girişi
+          </button>
+
+          <button type="submit" name="role" value="technician" class="btn btn-secondary btn-lg w-100 mb-2">
+            <i class="fas fa-user-cog me-2"></i> Tekniker Girişi
+          </button>
+
+          <a href="{{ url_for('admin_login') }}" class="btn btn-warning btn-lg w-100 text-dark">
+            <i class="fas fa-user-shield me-2"></i> Admin Girişi
+          </a>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- Kayıt Modal -->
+<div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4 rounded-lg border-0 text-center">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-primary w-100">Kim olarak kayıt olmak istiyorsunuz?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('choose_register') }}">
+
+                    <button type="submit" name="role" value="user" class="btn btn-primary btn-lg w-100 mb-2">
+                        <i class="fas fa-user me-2"></i> Üye Kayıt
+                    </button>
+
+                    <button type="submit" name="role" value="technician" class="btn btn-secondary btn-lg w-100">
+                        <i class="fas fa-user-cog me-2"></i> Tekniker Kayıt
+                    </button>
+
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <main class="container mt-lg-3">
+        {% block content %}{% endblock %}
+    </main>
+
+   <footer class="footer bg-primary text-white text-center py-5 mt-5">
+  <div class="container">
+    <div class="row">
+
+      <!-- Hakkımızda -->
+      <div class="col-md-4 mb-4 mb-md-0">
+        <h5 class="fw-bold text-light mb-3">Hakkımızda</h5>
+        <p class="text-white-50">Teknolojik Servis Yönetimi ile tamirat ve tadilat süreçlerinizi kolayca yönetin. Güvenilir ve hızlı çözümler sunuyoruz.</p>
+      </div>
+
+      <!-- Bağlantılar -->
+      <div class="col-md-4 mb-4 mb-md-0">
+        <h5 class="fw-bold text-light mb-3">Bağlantılar</h5>
+        <ul class="list-unstyled">
+          <li><a href="{{ url_for('index') }}" class="footer-link">Ana Sayfa</a></li>
+          <li><a href="{{ url_for('about') }}" class="footer-link">Hakkımızda</a></li>
+          <li><a href="{{ url_for('contact') }}" class="footer-link">İletişim</a></li>
+        </ul>
+      </div>
+
+      <!-- Sosyal Medya -->
+      <div class="col-md-4">
+        <h5 class="fw-bold text-light mb-3">Bizi Takip Et</h5>
+        <div class="d-flex justify-content-center gap-3">
+          <a href="https://www.instagram.com/ard__5555" target="_blank" class="social-link">
+            <i class="fab fa-instagram fa-xl"></i>
+          </a>
+          <a href="#" target="_blank" class="social-link">
+            <i class="fab fa-youtube fa-xl"></i>
+          </a>
+          <a href="#" target="_blank" class="social-link">
+            <i class="fab fa-twitter fa-xl"></i>
+          </a>
+          <a href="#" target="_blank" class="social-link">
+            <i class="fab fa-tiktok fa-xl"></i>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <hr class="my-4 border-light">
+
+    <p class="mb-0 text-white-50">&copy; 2025 Teknolojik Servis Yönetimi | Tüm Hakları Saklıdır.</p>
+  </div>
+</footer>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

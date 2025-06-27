@@ -1,0 +1,252 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Admin Paneli - Teknolojik Servis Yönetimi{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.js"></script>
+
+
+
+{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='admin_dashboard.css') }}">
+
+
+<div class="container mt-4">
+
+  <h1 class="text-center mb-5">Admin Paneli</h1>
+  <h2  class="fw-bold">👋 Hoşgeldiniz, <span class="text-info">{{ admin.ad }} {{ admin.soyad }}</span></h2><br>
+  <div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="card text-white bg-gradient-primary shadow h-100 border-0">
+      <div class="card-body d-flex align-items-center">
+        <div class="flex-shrink-0">
+          <i class="bi bi-people fs-1 me-3"></i>
+        </div>
+        <div>
+          <h6 class="text-uppercase opacity-75">Toplam Kullanıcı</h6>
+          <h2 class="fw-bold mb-0" id="totalUsers" data-count="{{ users|length }}">0</h2>
+        </div>
+      </div>
+      <div class="card-footer border-0 text-end small text-white-50">
+        <i class="bi bi-arrow-up-right-circle"></i> Aktif kullanıcı sayısı
+      </div>
+    </div>
+  </div>
+
+ <div class="col-md-4">
+  <div class="card text-white bg-gradient-success shadow h-100 border-0">
+    <div class="card-body d-flex align-items-center">
+      <div class="flex-shrink-0">
+        <i class="bi bi-tools fs-1 me-3"></i>
+      </div>
+      <div>
+        <h6 class="text-uppercase opacity-75">Toplam Tekniker</h6>
+        <h2 class="fw-bold mb-0" id="totalTechnicians" data-count="{{ technicians|length }}">0</h2>
+      </div>
+    </div>
+    <div class="card-footer border-0 text-end small text-white-50">
+      <i class="bi bi-hammer"></i> Başvuru yapan teknikerler
+    </div>
+  </div>
+</div>
+
+  <div class="col-md-4">
+    <div class="card text-white bg-gradient-info shadow h-100 border-0">
+      <div class="card-body d-flex align-items-center">
+        <div class="flex-shrink-0">
+          <i class="bi bi-check-circle fs-1 me-3"></i>
+        </div>
+        <div>
+          <h6 class="text-uppercase opacity-75">Onaylı Tekniker</h6>
+          <h2 class="fw-bold mb-0" id="approvedTechnicians" data-count="{{ technicians | selectattr("onay") | list | length }}">0</h2>
+        </div>
+      </div>
+      <div class="card-footer border-0 text-end small text-white-50">
+        <i class="bi bi-star"></i> Aktif çalışanlar
+      </div>
+    </div>
+  </div>
+</div>
+
+
+ 
+<!-- Temiz ve Modern Sekme Menüsü -->
+<ul class="nav nav-pills mb-4 justify-content-center" id="adminTabs" role="tablist" style="gap: 10px;">
+  
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active d-flex align-items-center gap-2 px-4 py-2 rounded fw-medium" 
+            id="users-tab" data-bs-toggle="pill" data-bs-target="#usersTab" type="button" role="tab"
+            aria-controls="usersTab" aria-selected="true"
+            style="border: 1px solid #0d6efd;">
+      <i class="bi bi-people fs-5"></i> Kullanıcılar
+    </button>
+  </li>
+
+  <li class="nav-item" role="presentation">
+    <button class="nav-link d-flex align-items-center gap-2 px-4 py-2 rounded fw-medium" 
+            id="technicians-tab" data-bs-toggle="pill" data-bs-target="#techniciansTab" type="button" role="tab"
+            aria-controls="techniciansTab" aria-selected="false"
+            style="border: 1px solid #0d6efd;">
+      <i class="bi bi-tools fs-5"></i> Teknikerler
+    </button>
+  </li>
+
+</ul>
+
+
+<!-- Sekme İçerikleri -->
+<div class="tab-content" id="adminTabsContent">
+
+  <!-- Kullanıcılar Sekmesi -->
+  <div class="tab-pane fade show active" id="usersTab" role="tabpanel" aria-labelledby="users-tab">
+    <div class="table-responsive">
+      <table id="usersTable" class="table table-hover align-middle">
+        <thead class="table-primary">
+          <tr>
+            <th>#</th>
+            <th>Ad Soyad</th>
+            <th>Email</th>
+            <th>TC</th>
+            <th>Telefon</th>
+            <th>Doğum Tarihi</th>
+            <th>Cinsiyet</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.ad }} {{ user.soyad }}</td>
+            <td><a href="mailto:{{ user.email }}" class="text-decoration-none">{{ user.email }}</a></td>
+            <td>{{ user.tc }}</td>
+            <td>{{ user.telefon }}</td>
+            <td>{{ user.dogum_tarihi.strftime('%d.%m.%Y') }}</td>
+            <td>{{ user.cinsiyet }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Teknikerler Sekmesi -->
+  <div class="tab-pane fade" id="techniciansTab" role="tabpanel" aria-labelledby="technicians-tab">
+    <div class="table-responsive">
+      <table id="techniciansTable" class="table table-hover align-middle">
+        <thead class="table-secondary">
+          <tr>
+            <th>#</th>
+            <th>Ad Soyad</th>
+            <th>Email</th>
+            <th>Uzmanlık</th>
+            <th>Onay</th>
+            <th>İptal</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tech in technicians %}
+          <tr>
+            <td>{{ tech.id }}</td>
+            <td>{{ tech.ad }} {{ tech.soyad }}</td>
+            <td><a href="mailto:{{ tech.email }}" class="text-decoration-none">{{ tech.email }}</a></td>
+            <td>{{ tech.uzmanlik }}</td>
+            <td>
+              {% if tech.onay %}
+                <span class="badge bg-success">Onaylı</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">Beklemede</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if tech.iptal %}
+                <span class="badge bg-danger">İptal</span>
+              {% else %}
+                <span class="badge bg-secondary">Aktif</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if not tech.onay and not tech.iptal %}
+                <a href="{{ url_for('onayla_tekniker', id=tech.id) }}" class="btn btn-sm btn-success me-1" title="Onayla">
+                  <i class="bi bi-check-circle"></i>
+                </a>
+                <a href="{{ url_for('iptal_tekniker', id=tech.id) }}" class="btn btn-sm btn-danger" title="İptal Et">
+                  <i class="bi bi-x-circle"></i>
+                </a>
+              {% elif tech.onay and not tech.iptal %}
+                <a href="{{ url_for('iptal_tekniker', id=tech.id) }}" class="btn btn-sm btn-danger" title="İptal Et">
+                  <i class="bi bi-x-circle"></i>
+                </a>
+              {% else %}
+                <span class="text-muted">İptal Edildi</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function() {
+  $('#usersTable').DataTable({
+    language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json' },
+    pageLength: 10
+  });
+  $('#techniciansTable').DataTable({
+    language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json' },
+    pageLength: 10
+  });
+
+  // 📊 Sayı Animasyonları
+  const totalUsers = document.getElementById('totalUsers');
+  const totalTechnicians = document.getElementById('totalTechnicians');
+  const approvedTechnicians = document.getElementById('approvedTechnicians');
+
+  const usersCount = new countUp.CountUp(totalUsers, totalUsers.dataset.count, { duration: 2 });
+  const techniciansCount = new countUp.CountUp(totalTechnicians, totalTechnicians.dataset.count, { duration: 2 });
+  const approvedTechniciansCount = new countUp.CountUp(approvedTechnicians, approvedTechnicians.dataset.count, { duration: 2 });
+
+  if (!usersCount.error) usersCount.start();
+  if (!techniciansCount.error) techniciansCount.start();
+  if (!approvedTechniciansCount.error) approvedTechniciansCount.start();
+});
+</script>
+
+
+{% endblock %}

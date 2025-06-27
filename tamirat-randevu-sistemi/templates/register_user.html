@@ -1,0 +1,139 @@
+{% extends "register_base.html" %}
+
+{% block title %}Üye Kayıt - Teknolojik Servis Yönetimi{% endblock %}
+
+{% block head %}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container mt-3">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="container mt-5">
+  <div class="card shadow-lg rounded-4">
+    <div class="card-body p-5">
+      <h3 class="card-title mb-4 text-center">Üye Kayıt Formu</h3>
+      <form method="post" action="{{ url_for('register_user') }}" autocomplete="off" novalidate>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="ad" class="form-label">Ad</label>
+            <input type="text" class="form-control" id="ad" name="ad" required autocomplete="off" spellcheck="false">
+          </div>
+
+          <div class="col-md-6">
+            <label for="soyad" class="form-label">Soyad</label>
+            <input type="text" class="form-control" id="soyad" name="soyad" required autocomplete="off" spellcheck="false">
+          </div>
+
+          <div class="col-md-6">
+            <label for="email" class="form-label">E-posta</label>
+            <input type="email" class="form-control" id="email" name="email" required autocomplete="off" spellcheck="false">
+          </div>
+
+          <div class="col-md-6">
+            <label for="tc" class="form-label">TC Kimlik No</label>
+            <input type="text" class="form-control" id="tc" name="tc" maxlength="11" pattern="\d{11}" placeholder="11 haneli TC no" required autocomplete="off" spellcheck="false">
+          </div>
+
+          <div class="col-md-6">
+            <label for="telefon" class="form-label">Telefon</label>
+            <input type="tel" class="form-control" id="telefon" name="telefon" maxlength="11" pattern="\d{11}" placeholder="05xxxxxxxxx" required autocomplete="off" spellcheck="false">
+          </div>
+
+          <div class="col-md-6">
+            <label for="dogumTarihi" class="form-label">Doğum Tarihi</label>
+            <input type="date" class="form-control" id="dogumTarihi" name="dogumTarihi" required autocomplete="off" spellcheck="false">
+          </div>
+
+          <div class="col-md-6">
+            <label for="cinsiyet" class="form-label">Cinsiyet</label>
+            <select class="form-select" id="cinsiyet" name="cinsiyet" required autocomplete="off" spellcheck="false">
+              <option value="">Seçiniz...</option>
+              <option value="Erkek">Erkek</option>
+              <option value="Kadın">Kadın</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label for="konum" class="form-label">Konum (Enlem, Boylam)</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="konum" name="konum" placeholder="Konum alınamadı" readonly required autocomplete="off" spellcheck="false">
+
+              <button type="button" class="btn btn-outline-primary" onclick="konumuAl()">Konumu Al</button>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="sifre" class="form-label">Şifre</label>
+            <input type="password" class="form-control" id="sifre" name="sifre" required autocomplete="new-password" spellcheck="false">
+          </div>
+
+          <div class="col-md-6">
+            <label for="sifreOnay" class="form-label">Şifre (Tekrar)</label>
+            <input type="password" class="form-control" id="sifreOnay" name="sifreOnay" required autocomplete="new-password" spellcheck="false">
+          </div>
+        </div>
+
+        <div class="d-grid gap-2 mt-4">
+          <button type="submit" class="btn btn-primary btn-lg rounded-3">Kayıt Ol</button>
+        </div>
+
+        <div class="text-center mt-3">
+          <span>Hesabınız var mı? <a href="{{ url_for('user_login') }}" class="text-primary fw-bold">Giriş Yap</a></span>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // TC Kimlik No ve Telefon sadece rakam olmalı
+  document.getElementById("tc").addEventListener("input", function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 11);
+  });
+
+  document.getElementById("telefon").addEventListener("input", function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 11);
+  });
+
+  // Konum alma fonksiyonu
+  window.konumuAl = function() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        const enlem = position.coords.latitude.toFixed(5);
+        const boylam = position.coords.longitude.toFixed(5);
+        document.getElementById("konum").value = `${enlem}, ${boylam}`;
+      }, function(error) {
+        alert("Konum alınamadı: " + error.message);
+      });
+    } else {
+      alert("Tarayıcınız konum özelliğini desteklemiyor.");
+    }
+  }
+
+  // Şifre eşleşme kontrolü
+  document.querySelector("form").addEventListener("submit", function(e) {
+    const sifre = document.getElementById("sifre").value;
+    const sifreOnay = document.getElementById("sifreOnay").value;
+    if (sifre !== sifreOnay) {
+      e.preventDefault();
+      alert("Şifreler eşleşmiyor!");
+    }
+  });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Duyuru Düzenle{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+
+<div class="container mt-5">
+  <div class="card shadow-lg border-0 rounded-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-top">
+      <h4 class="mb-0"><i class="bi bi-megaphone-fill me-2"></i> Duyuru Düzenle</h4>
+     
+    </div>
+
+    <div class="card-body p-4">
+
+      <form method="POST">
+        <div class="mb-3">
+          <label for="baslik" class="form-label fw-semibold">Başlık</label>
+          <input type="text" class="form-control shadow-sm" id="baslik" name="baslik" value="{{ duyuru.title }}" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="icerik" class="form-label fw-semibold">İçerik</label>
+          <textarea class="form-control shadow-sm" id="icerik" name="icerik" rows="5" maxlength="500" required>{{ duyuru.content }}</textarea>
+          <div class="form-text text-end"><span id="charCount">0</span>/500 karakter</div>
+        </div>
+
+        <div class="mb-4">
+          <label for="hedef_kitle" class="form-label fw-semibold">Hedef Kitle</label>
+          <select class="form-select shadow-sm" id="hedef_kitle" name="hedef_kitle" required>
+            <option value="" disabled selected>Bir hedef kitle seçiniz</option>
+            <option value="tekniker" {% if duyuru.target_group == 'tekniker' %}selected{% endif %}>Teknikerler</option>
+            <option value="kullanici" {% if duyuru.target_group == 'kullanici' %}selected{% endif %}>Üyeler</option>
+          </select>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <button type="submit" class="btn btn-success px-4 py-2 fw-semibold shadow-sm">
+            <i class="bi bi-check-circle me-2"></i>Kaydet
+          </button>
+          <a href="{{ url_for('announcement_add') }}" class="btn btn-outline-secondary px-4 py-2 fw-semibold">
+            <i class="bi bi-arrow-left-circle me-2"></i>Geri Dön
+          </a>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Karakter sayacı
+  const icerikInput = document.getElementById('icerik');
+  const charCount = document.getElementById('charCount');
+  charCount.innerText = icerikInput.value.length;
+
+  icerikInput.addEventListener('input', () => {
+    charCount.innerText = icerikInput.value.length;
+  });
+</script>
+{% endblock %}

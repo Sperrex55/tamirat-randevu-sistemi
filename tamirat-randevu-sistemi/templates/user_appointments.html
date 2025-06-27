@@ -1,0 +1,104 @@
+{% extends "base_user.html" %}
+{% block title %}Randevularım{% endblock %}
+<link rel="stylesheet" href="{{ url_for('static', filename='user_appointments.css') }}">
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="container mt-4">
+  <h2 class="mb-4">📅 Randevularım</h2>
+
+  <div id="alert-no-appointments" class="alert alert-info" role="alert" style="display:none;">
+    Henüz randevunuz bulunmamaktadır.
+  </div>
+
+  <div class="table-responsive" id="appointments-table-container" style="display:none;">
+    <table class="table table-hover table-bordered align-middle shadow-sm rounded-4 overflow-hidden" id="appointments-table">
+      <thead class="table-primary">
+        <tr>
+          <th scope="col">Tarih</th>
+          <th scope="col">Uzmanlık</th>
+          <th scope="col">Kategori</th>
+          <th scope="col">Açıklama</th>
+          <th scope="col">Durum</th>
+          <th scope="col">İşlem</th>
+        </tr>
+      </thead>
+      <tbody id="appointments-tbody">
+        <!-- Buraya AJAX ile gelecek randevular yazılacak -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+async function fetchAppointments() {
+  try {
+    const res = await fetch("{{ url_for('api_user_appointments_status') }}");
+    if (!res.ok) throw new Error("Veri alınamadı");
+
+    const data = await res.json();
+    const tbody = document.getElementById('appointments-tbody');
+    const tableContainer = document.getElementById('appointments-table-container');
+    const noAppointmentsAlert = document.getElementById('alert-no-appointments');
+
+    if (data.appointments.length === 0) {
+      tableContainer.style.display = 'none';
+      noAppointmentsAlert.style.display = 'block';
+      tbody.innerHTML = '';
+      return;
+    }
+
+    noAppointmentsAlert.style.display = 'none';
+    tableContainer.style.display = 'block';
+
+    tbody.innerHTML = '';
+
+    data.appointments.forEach(appt => {
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td><i class="bi bi-calendar-event"></i> ${appt.date}</td>
+        <td>${appt.uzmanlik}</td>
+        <td><span class="badge bg-info text-dark">${appt.category}</span></td>
+        <td style="max-height: 80px; overflow-y: auto; white-space: normal; max-width: 300px;">${appt.description}</td>
+        <td>
+          ${appt.status === 'Onaylandı' ? '<span class="badge bg-success">Onaylandı</span>' : ''}
+          ${appt.status === 'Beklemede' ? '<span class="badge bg-warning text-dark">Beklemede</span>' : ''}
+          ${appt.status === 'İptal Edildi' ? '<span class="badge bg-danger">İptal Edildi</span>' : ''}
+          ${appt.status === 'Tekniker Bekliyor' ? '<span class="badge bg-secondary">Tekniker Bekliyor</span>' : ''}
+        </td>
+        <td>
+          <a href="/user/appointment/edit/${appt.id}" class="btn btn-sm btn-primary">
+            <i class="bi bi-pencil-square"></i> Düzenle
+          </a>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  fetchAppointments();
+  setInterval(fetchAppointments, 5000);  // 5 saniyede bir yenile
+});
+</script>
+
+{% endblock %}

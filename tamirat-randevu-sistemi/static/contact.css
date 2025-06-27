@@ -1,0 +1,165 @@
+/* Hero Bölümü */
+.contact-hero {
+    width: 100%;
+    height: 380px;
+    background: linear-gradient(135deg, #4e54c8, #8f94fb);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 50px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.25);
+    border-radius: 0 0 30px 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    animation: fadeDown 1s ease;
+}
+
+/* Breadcrumb Navigasyonu */
+.breadcrumb {
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.breadcrumb-item a {
+    color: #ffd700;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: white;
+}
+
+/* İletişim Görseli */
+.contact-img img {
+    border-radius: 16px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.25);
+    transition: transform 0.4s ease;
+}
+
+.contact-img img:hover {
+    transform: scale(1.03);
+}
+
+/* İletişim Bilgi Listesi */
+.contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.contact-list li {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    color: #333;
+}
+
+/* Sayfa Layout */
+.contact-section {
+    padding: 50px 0;
+    margin-top: 20px;
+}
+
+/* Form Kartı */
+.contact-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.08);
+    padding: 35px;
+    transition: all 0.3s ease;
+}
+
+.contact-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 14px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Giriş Alanları */
+.animated-input {
+    border-radius: 10px;
+    box-shadow: inset 0px 3px 6px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.animated-input:focus {
+    box-shadow: 0px 4px 8px rgba(78, 84, 200, 0.3);
+}
+
+/* Buton */
+.submit-btn {
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4e54c8, #8f94fb);
+    border: none;
+    transition: all 0.3s ease-in-out;
+    color: #fff;
+}
+
+.submit-btn:hover {
+    background: linear-gradient(135deg, #3d41a8, #7d82f1);
+    transform: translateY(-2px);
+    box-shadow: 0px 4px 12px rgba(78, 84, 200, 0.25);
+}
+
+/* Google Maps */
+.map-container {
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+    margin-top: 25px;
+}
+
+.map-container iframe {
+    border: 0;
+    width: 100%;
+    height: 400px;
+}
+
+/* Animasyon */
+@keyframes fadeDown {
+    from {
+        opacity: 0;
+        transform: translateY(-25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .contact-hero {
+        height: 300px;
+        padding: 30px;
+    }
+
+    .contact-hero h1 {
+        font-size: 2.3rem;
+    }
+
+    .contact-card {
+        padding: 25px;
+    }
+
+    .submit-btn {
+        font-size: 1rem;
+    }
+
+    .contact-list li {
+        font-size: 1rem;
+    }
+}

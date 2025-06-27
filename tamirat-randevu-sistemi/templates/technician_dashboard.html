@@ -1,0 +1,153 @@
+{% extends "base_technician.html" %}
+
+{% block title %}Teknisyen Paneli{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="container my-4">
+
+  <!-- Hoşgeldin -->
+  <div class="text-center mb-5">
+    <h2>👋 Hoş geldin, <strong>{{ technician.ad }} {{ technician.soyad }}</strong></h2>
+    <p class="text-muted fs-5">📌 Uzmanlık Alanı: <strong>{{ technician.uzmanlik }}</strong></p>
+  </div>
+
+  <!-- İstatistik Kutuları -->
+  <div class="row g-4">
+    {% for stat in [
+      {'icon': 'calendar-check', 'color': 'success', 'title': 'Toplam Randevu', 'value': total_appointments},
+      {'icon': 'clock-history', 'color': 'warning', 'title': 'Bekleyen', 'value': pending_appointments},
+      {'icon': 'check2-circle', 'color': 'primary', 'title': 'Tamamlanan', 'value': completed_appointments},
+      {'icon': 'envelope-paper', 'color': 'danger', 'title': 'Gelen Mesaj', 'value': total_messages}
+      ] %}
+      <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-light h-100 d-flex flex-column justify-content-center align-items-center text-center hover-scale">
+          <i class="bi bi-{{ stat.icon }} fs-1 text-{{ stat.color }}"></i>
+          <h5 class="card-title mt-3 fw-semibold">{{ stat.title }}</h5>
+          <h2 class="text-{{ stat.color }} fw-bold">{{ stat.value }}</h2>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Güncel Duyurular -->
+  <h3 class="mt-5 mb-4 fw-bold border-start border-4 border-primary ps-3">📢 Güncel Duyurular</h3>
+
+  {% if announcements %}
+    <div class="row g-3">
+      {% for duyuru in announcements %}
+        <div class="col-12">
+          <div class="card border-0 shadow-sm rounded-4 p-3 h-100 announcement-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="fw-semibold mb-0 text-primary">
+                <i class="bi bi-megaphone-fill me-2"></i> {{ duyuru.title }}
+              </h5>
+              <small class="text-muted">{{ duyuru.date_created.strftime('%d.%m.%Y %H:%M') }}</small>
+            </div>
+            <p class="text-secondary mb-0 announcement-content">{{ duyuru.content }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info d-flex align-items-center gap-2 mt-3" role="alert">
+      <i class="bi bi-info-circle-fill fs-4"></i>
+      Henüz duyuru bulunmamaktadır.
+    </div>
+  {% endif %}
+
+  <!-- Son Randevular Listesi -->
+  <div class="mt-5">
+    <h4 class="fw-bold border-bottom pb-2"><i class="bi bi-list-task me-2 text-primary"></i> Son Randevular</h4>
+
+    {% if recent_appointments %}
+      <div class="list-group mt-3">
+        {% for appt in recent_appointments %}
+          <div class="list-group-item d-flex justify-content-between align-items-start rounded-3 shadow-sm mb-2 appointment-item">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold fs-6">{{ appt.customer_name }} — <span class="text-muted fst-italic">{{ appt.category }}</span></div>
+              <small class="text-muted d-block">📅 {{ appt.date.strftime('%d %B %Y, %H:%M') }}</small>
+              <small class="text-muted d-block">📌 Durum: <span class="fw-semibold">{{ appt.status }}</span></small>
+            </div>
+            {% if appt.status == 'Tamamlandı' %}
+              <span class="badge bg-primary rounded-pill fs-5">✓</span>
+            {% elif appt.status == 'Beklemede' %}
+              <span class="badge bg-warning text-dark rounded-pill fs-5">⏳</span>
+            {% elif appt.status == 'İptal' %}
+              <span class="badge bg-danger rounded-pill fs-5">✖</span>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info mt-3 text-center rounded-3 shadow-sm">
+        <i class="bi bi-info-circle"></i> Henüz randevu kaydı yok.
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+  /* Kart hover efekti */
+  .hover-scale {
+    transition: transform 0.3s ease;
+  }
+  .hover-scale:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 0.15);
+  }
+
+  /* Duyuru içeriği satır sınırlaması ve taşmayı gizle */
+  .announcement-content {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Duyuru kart hover */
+  .announcement-card:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.3s ease;
+  }
+
+  /* Son randevu öğesi hover */
+  .appointment-item:hover {
+    background-color: #f1f3f5;
+    transition: background-color 0.25s ease;
+  }
+
+  /* Kart içeriği padding ayarı */
+  .card-body {
+    padding: 2rem;
+  }
+
+  /* List group item font boyutu */
+  .list-group-item {
+    font-size: 0.95rem;
+  }
+
+  /* Badge font boyutu */
+  .badge {
+    font-size: 1.1rem;
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,339 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Randevu Yönetimi - Admin Paneli{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+<style>
+ body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #212529;
+}
+
+.container {
+  max-width: 1100px;
+}
+
+h2 {
+  color: #212529;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.table-responsive {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+}
+
+tbody tr:hover {
+  background-color: #e9f5ff;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.table-danger {
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.btn i {
+  vertical-align: middle;
+  font-size: 1.1rem;
+}
+
+.btn-outline-danger {
+  transition: 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  color: #fff !important;
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 10px rgba(220, 53, 69, 0.4);
+}
+
+.btn-info {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(0, 242, 254, 0.5);
+  transition: 0.3s ease;
+}
+
+.btn-info:hover {
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.8);
+}
+
+.modal-content {
+  overflow: hidden;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  padding: 1rem 1.5rem;
+}
+
+.modal-title {
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #ffffff;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #4a90e2, #357ABD);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-body ul {
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+}
+
+.modal-body ul li {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.modal-body p {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.badge {
+  font-size: 0.9rem;
+  padding: 0.4em 0.75em;
+  border-radius: 0.6rem;
+}
+
+.toast-body {
+  font-size: 0.95rem;
+}
+
+.toast .btn-close {
+  font-size: 0.8rem;
+}
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="toast align-items-center text-bg-{{ category }} border-0 show mb-2">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+
+<div class="container mt-5 px-3 px-md-0">
+  <h2 class="mb-4 text-center fw-bold">Randevu Yönetimi</h2>
+
+  <div class="table-responsive">
+    <table id="appointmentsTable" class="table table-striped table-hover align-middle mb-0">
+      <thead class="table-primary text-primary text-uppercase">
+        <tr>
+          <th>ID</th>
+          <th>Kullanıcı</th>
+          <th>Tekniker</th>
+          <th>Tarih & Saat</th>
+          <th>Durum</th>
+          <th>İşlemler</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for appointment in appointments %}
+        <tr class="{% if appointment.status == 'iptal' %}table-danger{% endif %}">
+          <td>{{ appointment.id }}</td>
+          <td>{{ appointment.user.ad }} {{ appointment.user.soyad }}</td>
+          <td>{{ appointment.technician.ad }} {{ appointment.technician.soyad }}</td>
+          <td>{{ appointment.date.strftime('%d.%m.%Y %H:%M') }}</td>
+          <td>
+            {% if appointment.status == 'onaylandi' %}
+              <span class="badge bg-success">Onaylandı</span>
+            {% elif appointment.status == 'iptal' %}
+              <span class="badge bg-danger">İptal Edildi</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Beklemede</span>
+            {% endif %}
+          </td>
+          <td>
+            <button type="button" class="btn btn-sm btn-info me-1"
+              data-bs-toggle="modal" data-bs-target="#appointmentModal"
+              data-id="{{ appointment.id }}"
+              data-user="{{ appointment.user.ad }} {{ appointment.user.soyad }}"
+              data-technician="{{ appointment.technician.ad }} {{ appointment.technician.soyad }}"
+              data-date="{{ appointment.date.strftime('%d.%m.%Y %H:%M') }}"
+              data-status="{{ appointment.status }}"
+              data-description="{{ appointment.description|default('Yok') }}">
+              <i class="bi bi-eye"></i>
+            </button>
+
+            <button type="button" class="btn btn-sm btn-outline-danger"
+              data-bs-toggle="modal"
+              data-bs-target="#cancelAppointmentModal"
+              data-id="{{ appointment.id }}"
+              data-user="{{ appointment.user.ad }} {{ appointment.user.soyad }}"
+              {% if appointment.status == 'iptal' %}disabled{% endif %}>
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center py-4">Kayıtlı randevu bulunmamaktadır.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Detay Modal -->
+<div class="modal fade" id="appointmentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow">
+
+      <div class="modal-header text-white rounded-top" style="background: linear-gradient(45deg, #0d6efd, #6610f2);">
+        <h5 class="modal-title d-flex align-items-center mb-0">
+          <i class="bi bi-calendar-event me-2 fs-4"></i> Randevu Detayları
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <ul class="list-unstyled mb-0">
+          <li class="mb-3">
+            <strong class="text-secondary"><i class="bi bi-hash me-2"></i>ID:</strong>
+            <span id="modalAppointmentId" class="text-dark fw-semibold"></span>
+          </li>
+          <li class="mb-3">
+            <strong class="text-secondary"><i class="bi bi-person-circle me-2"></i>Kullanıcı:</strong>
+            <span id="modalUserName" class="text-dark"></span>
+          </li>
+          <li class="mb-3">
+            <strong class="text-secondary"><i class="bi bi-wrench-adjustable-circle me-2"></i>Tekniker:</strong>
+            <span id="modalTechnicianName" class="text-dark"></span>
+          </li>
+          <li class="mb-3">
+            <strong class="text-secondary"><i class="bi bi-calendar3 me-2"></i>Tarih:</strong>
+            <span id="modalDate" class="text-dark"></span>
+          </li>
+          <li class="mb-3">
+            <strong class="text-secondary"><i class="bi bi-info-circle me-2"></i>Durum:</strong>
+            <span id="modalStatus" class="badge rounded-pill px-3 py-1"></span>
+          </li>
+          <li>
+            <strong class="text-secondary"><i class="bi bi-card-text me-2"></i>Açıklama:</strong>
+            <p id="modalDescription" class="text-dark mt-1 mb-0"></p>
+          </li>
+        </ul>
+      </div>
+
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+          Kapat
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- İptal Onay Modal -->
+<div class="modal fade" id="cancelAppointmentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Randevu İptali</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center fs-5">
+        <p><strong id="cancelUserName"></strong> adlı kullanıcının randevusunu iptal etmek istediğinize emin misiniz?</p>
+      </div>
+      <div class="modal-footer border-0 justify-content-between">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Vazgeç</button>
+        <form id="cancelAppointmentForm" method="POST">
+          <button type="submit" class="btn btn-danger">Evet, İptal Et</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+  $('#appointmentsTable').DataTable({
+    language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json' },
+    pageLength: 10
+  });
+
+  var detailModal = document.getElementById('appointmentModal');
+  detailModal.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+
+    document.getElementById('modalAppointmentId').innerText = button.getAttribute('data-id');
+    document.getElementById('modalUserName').innerText = button.getAttribute('data-user');
+    document.getElementById('modalTechnicianName').innerText = button.getAttribute('data-technician');
+    document.getElementById('modalDate').innerText = button.getAttribute('data-date');
+    document.getElementById('modalDescription').innerText = button.getAttribute('data-description');
+
+    // Durum badge ayarı
+    var statusSpan = document.getElementById('modalStatus');
+    var statusValue = button.getAttribute('data-status');
+
+    // Tüm mevcut badge class'larını temizle
+    statusSpan.className = 'badge rounded-pill px-3 py-1';
+
+    // Duruma göre class ve yazı ekle
+    if (statusValue === 'onaylandi') {
+      statusSpan.classList.add('bg-success');
+      statusSpan.innerText = 'Onaylandı';
+    } else if (statusValue === 'iptal') {
+      statusSpan.classList.add('bg-danger');
+      statusSpan.innerText = 'İptal Edildi';
+    } else {
+      statusSpan.classList.add('bg-warning', 'text-dark');
+      statusSpan.innerText = 'Beklemede';
+    }
+  });
+
+  var cancelModal = document.getElementById('cancelAppointmentModal');
+  cancelModal.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+    var id = button.getAttribute('data-id');
+    var user = button.getAttribute('data-user');
+    document.getElementById('cancelUserName').textContent = user;
+    var actionUrl = "{{ url_for('admin_cancel_appointment', appointment_id=0) }}".replace('0', id);
+    document.getElementById('cancelAppointmentForm').action = actionUrl;
+  });
+});
+
+</script>
+{% endblock %}
